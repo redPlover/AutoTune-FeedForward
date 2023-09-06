@@ -1,0 +1,12 @@
+{
+    "motor1": {
+        "Type": "Linear",
+        "Inverted": true,
+        "CAN-Id": 1,
+        "Encoder": {
+            "Type": "Quadrature",
+            "Inverted": false,
+            "CAN": 2
+        }
+    }
+}
