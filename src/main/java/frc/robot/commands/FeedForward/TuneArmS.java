@@ -2,43 +2,39 @@ package frc.robot.commands.FeedForward;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 
 public class TuneArmS extends CommandBase {
-    private WristSubsystem wrist;
+    private ArmSubsystem arm;
 
-    double[] encoderPositions;
-    double[] motorOutputs;
+    double startPosition;
 
-    double startPosition; // TODO
+    double appliedVolts;
 
-    double S = 0;
-
-    public TuneArmS(WristSubsystem wrist) {
-        this.wrist = wrist;
+    public TuneArmS(ArmSubsystem arm) {
+        this.arm = arm;
     }
 
     @Override
     public void initialize() {
-        startPosition = wrist.getPositionRad();
-        S = 0;
+        startPosition = arm.getPositionRad();
+        appliedVolts = 0;
     }
 
     @Override
     public void execute() {
-        wrist.setVolts(S);
-        S += 0.001;
-        SmartDashboard.putNumber("kS", S);
+        arm.setVolts(appliedVolts);
+        appliedVolts += 0.001;
     }
 
     @Override
     public void end(boolean interrupted) {
-        wrist.stop();
-        SmartDashboard.putNumber("kS", S);
+        arm.stop();
+        SmartDashboard.putNumber("kS", appliedVolts);
     }
 
     @Override
     public boolean isFinished() {
-        return wrist.getPositionRad() > Math.abs(startPosition - 20);
+        return arm.getPositionRad() > Math.abs(startPosition - 20);
     }
 }

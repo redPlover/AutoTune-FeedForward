@@ -2,7 +2,7 @@ package frc.robot.commands.PID;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.ArmComponents.WristSubsystem;
 
 public class TuneArmP extends CommandBase {
     private WristSubsystem wrist;

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 
 public class TuneArmV extends CommandBase {
-    private WristSubsystem wrist;
+    private ArmSubsystem arm;
 
     private double volts;
 
@@ -16,27 +16,29 @@ public class TuneArmV extends CommandBase {
     double startPosition; // TODO
 
     double kS;
+    double pastkV;
     double average = 0;
     double vel = 0;
 
-    public TuneArmV(WristSubsystem wrist, double volts, double kS) {
-        this.wrist = wrist;
+    public TuneArmV(ArmSubsystem arm, double volts, double kS, double past) {
+        this.arm = arm;
         this.volts = volts;
         this.kS = kS;
+        this.pastkV = past;
     }
 
     @Override
     public void initialize() {
         SmartDashboard.putBoolean("Ended", false);
-        wrist.setVolts(-volts);
+        arm.setVolts(volts);
         velocities = new ArrayList<Double>();
     }
 
     @Override
     public void execute() {
-        vel = wrist.getVelRadS();
+        vel = arm.getVelRadS();
         SmartDashboard.putNumber("Velocity", vel);
-        if(Math.abs(wrist.getPositionRad()) < 0.6) {
+        if(Math.abs(arm.getPositionRad()) < 0.6) {
             velocities.add(vel);
         }
     }
@@ -44,7 +46,7 @@ public class TuneArmV extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         SmartDashboard.putBoolean("Ended", true);
-        wrist.stop();
+        arm.stop();
 
         for(double v : velocities) {
             average += v;
@@ -52,11 +54,11 @@ public class TuneArmV extends CommandBase {
 
         average /= velocities.size();
 
-        SmartDashboard.putNumber("kV", (volts - kS) / average);
+        SmartDashboard.putNumber("kV", ((volts - kS) / average) + pastkV);
     }
 
     @Override
     public boolean isFinished() {
-        return wrist.getPositionRad() < -1;
+        return Math.abs(arm.getPositionRad()) > 1;
     }
 }

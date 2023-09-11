@@ -16,7 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.FeedForward.TuneArmG;
 import frc.robot.commands.FeedForward.TuneArmS;
 import frc.robot.commands.FeedForward.TuneArmV;
-import frc.robot.subsystems.WristSubsystem;
+import frc.robot.commands.Transitions.StaticToGravity;
+import frc.robot.subsystems.ArmComponents.PivotSubsystem;
+import frc.robot.subsystems.ArmComponents.WristSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -34,11 +36,11 @@ public class Robot extends TimedRobot {
      * initialization code.
      */
     private WristSubsystem wrist = new WristSubsystem();
+    private PivotSubsystem pivot = new PivotSubsystem();
+
+    private double kV = 0.0;
 
     private final CommandXboxController masher = new CommandXboxController(2);
-    // private final XboxController masher = new XboxController(2);
-
-    private double wristManualVolts = 0.0;
 
     @Override
     public void robotInit() {
@@ -46,14 +48,10 @@ public class Robot extends TimedRobot {
         
         masher.b().onTrue(new TuneArmG(wrist, 0.725));
 
-        masher.y().onTrue(new TuneArmV(wrist, 5, 0.725));
-
-        // masher.y()
-        //     .onTrue(new InstantCommand(() -> wrist.setVolts(wristManualVolts)))
-        //     .onFalse(new InstantCommand(() -> wrist.stop()));
+        masher.y().onTrue(new TuneArmV(wrist, 5, 0.725, 0.0));
 
         masher.x()
-            .onTrue(new InstantCommand(() -> wrist.setVolts(wristManualVolts)))
+            .onTrue(new InstantCommand(() -> wrist.setVolts(3)))
             .onFalse(new InstantCommand(() -> wrist.stop()));
 
         SmartDashboard.putNumber("Wrist Volts", 0.0);
@@ -66,7 +64,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        wristManualVolts = SmartDashboard.getNumber("Wrist Volts", 0.0);
     }
 
     @Override
@@ -80,11 +77,19 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         wrist.zero();
-        // new JoystickButton(masher, 3)
-        //     .onTrue()
-        // new SequentialCommandGroup(new TuneWristS(wrist)).schedule();
-        // new TuneArmS(wrist).schedule();
-        // new TuneArmG(wrist).schedule();
+
+        new SequentialCommandGroup( new TuneArmS(wrist),
+                                    new StaticToGravity(wrist),
+                                    new TuneArmG(wrist, SmartDashboard.getNumber("kS", 0.0))
+        ).schedule();
+
+        new SequentialCommandGroup( new TuneArmS(pivot),
+                                    new StaticToGravity(pivot),
+                                    new TuneArmG(pivot, SmartDashboard.getNumber("kS", 0.0)),
+                                    new TuneArmV(pivot, -2, SmartDashboard.getNumber("kS", 0.0), 0.0),
+                                    new TuneArmV(pivot, 3, SmartDashboard.getNumber("kS", 0.0), SmartDashboard.getNumber("kV", 0.0)),
+                                    new TuneArmV(pivot, -4, SmartDashboard.getNumber("kS", 0.0), SmartDashboard.getNumber("kV", 0.0))
+        ).schedule();
     }
 
     @Override

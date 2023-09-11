@@ -1,13 +1,14 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.ArmComponents;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ArmSubsystem;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
-public class WristSubsystem extends SubsystemBase {
+public class WristSubsystem extends ArmSubsystem {
     private TalonFX motor = new TalonFX(17);
 
     public WristSubsystem() {
@@ -36,7 +37,6 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public void periodic() {
-        SmartDashboard.putNumber("Encoder Value", getPositionRad());
-        SmartDashboard.putNumber("Get Velocity", getVelRadS());
+        SmartDashboard.putNumber("Wrist Encoder Value", getPositionRad());
     }
 }
